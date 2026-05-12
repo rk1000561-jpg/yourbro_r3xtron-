@@ -18,23 +18,42 @@ COOKIE = "dom3ic8zudi28v8lr6fgphwffqoz0j6c=62d8e56f-b3e1-41e3-9b2e-a9c1073f4fcc:
 
 @app.route("/")
 def home():
-    return jsonify({
-        "success": True,
-        "message": "Free Fire API Running",
-        "usage": "/api?uid=XXXX&region=ind&nonce=XXXX"
-    })
+    return jsonify({"status": "running"})
 
 
 @app.route("/api")
-def get_profile():
+def get_data():
     uid = request.args.get("uid")
     region = request.args.get("region", "ind")
     nonce = request.args.get("nonce")
 
     if not uid or not nonce:
-        return jsonify({
-            "success": False,
-            "error": "uid or nonce missing"
+        return jsonify({"success": False, "error": "uid/nonce missing"})
+
+    data = {
+        "action": "ff_get_player_info_paid",
+        "uid": uid,
+        "region": region,
+        "nonce": nonce
+    }
+
+    try:
+        res = requests.post(
+            URL,
+            headers=HEADERS,
+            cookies={"cookie": COOKIE},
+            data=data
+        )
+
+        return jsonify(res.json())
+
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)})
+
+
+# ⭐ IMPORTANT: Vercel needs THIS
+def handler(environ, start_response):
+    return app(environ, start_response)            "error": "uid or nonce missing"
         })
 
     data = {
