@@ -1,5 +1,7 @@
+from flask import Flask, request, jsonify
 import requests
-from http.server import BaseHTTPRequestHandler
+
+app = Flask(__name__)
 
 URL = "https://freefirenation.com/wp-admin/admin-ajax.php"
 
@@ -14,27 +16,55 @@ HEADERS = {
 COOKIE = "dom3ic8zudi28v8lr6fgphwffqoz0j6c=62d8e56f-b3e1-41e3-9b2e-a9c1073f4fcc:2:1"
 
 
-class handler(BaseHTTPRequestHandler):
+@app.route("/")
+def home():
+    return jsonify({
+        "success": True,
+        "message": "Free Fire API Running",
+        "usage": "/api?uid=XXXX&region=ind&nonce=XXXX"
+    })
 
-    def do_GET(self):
-        try:
-            import urllib.parse as up
 
-            query = up.urlparse(self.path).query
-            params = up.parse_qs(query)
+@app.route("/api")
+def get_profile():
+    uid = request.args.get("uid")
+    region = request.args.get("region", "ind")
+    nonce = request.args.get("nonce")
 
-            uid = params.get("uid", [None])[0]
-            region = params.get("region", ["ind"])[0]
-            nonce = params.get("nonce", [None])[0]
+    if not uid or not nonce:
+        return jsonify({
+            "success": False,
+            "error": "uid or nonce missing"
+        })
 
-            if not uid or not nonce:
-                self.send_response(200)
-                self.send_header("Content-type", "application/json")
-                self.end_headers()
-                self.wfile.write(b'{"success":false,"error":"uid or nonce missing"}')
-                return
+    data = {
+        "action": "ff_get_player_info_paid",
+        "uid": uid,
+        "region": region,
+        "nonce": nonce
+    }
 
-            data = {
+    try:
+        res = requests.post(
+            URL,
+            headers=HEADERS,
+            cookies={"cookie": COOKIE},
+            data=data,
+            timeout=15
+        )
+
+        return jsonify(res.json())
+
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "error": str(e)
+        })
+
+
+# Vercel handler
+def handler(environ, start_response):
+    return app(environ, start_response)            data = {
                 "action": "ff_get_player_info_paid",
                 "uid": uid,
                 "region": region,
