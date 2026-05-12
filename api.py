@@ -16,24 +16,22 @@ HEADERS = {
 COOKIE = "dom3ic8zudi28v8lr6fgphwffqoz0j6c=62d8e56f-b3e1-41e3-9b2e-a9c1073f4fcc:2:1"
 
 
-@app.route("/")
-def home():
-    return jsonify({"status": "running", "repo": "yourbro_r3xtron"})
-
-
+# ⚡ MAIN SIMPLE ENDPOINT
 @app.route("/api")
-def api():
+def get_profile():
     uid = request.args.get("uid")
-    region = request.args.get("region", "ind")
-    nonce = request.args.get("nonce")
 
-    if not uid or not nonce:
-        return jsonify({"success": False, "error": "uid/nonce missing"})
+    if not uid:
+        return jsonify({"success": False, "error": "uid required"})
+
+    # ⚠️ NOTE: static nonce (demo purpose)
+    # real production me dynamic nonce chahiye hota hai
+    nonce = "2d79f616a1"
 
     data = {
         "action": "ff_get_player_info_paid",
         "uid": uid,
-        "region": region,
+        "region": "ind",
         "nonce": nonce
     }
 
@@ -42,14 +40,21 @@ def api():
             URL,
             headers=HEADERS,
             cookies={"cookie": COOKIE},
-            data=data,
-            timeout=15
+            data=data
         )
+
         return jsonify(res.json())
 
     except Exception as e:
         return jsonify({"success": False, "error": str(e)})
 
 
-# ⭐ IMPORTANT: Vercel needs THIS (no api/ folder required)
+@app.route("/")
+def home():
+    return jsonify({
+        "status": "running",
+        "usage": "/api?uid=YOUR_ID"
+    })
+
+
 handler = app
