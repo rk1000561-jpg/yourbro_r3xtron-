@@ -18,11 +18,11 @@ COOKIE = "dom3ic8zudi28v8lr6fgphwffqoz0j6c=62d8e56f-b3e1-41e3-9b2e-a9c1073f4fcc:
 
 @app.route("/")
 def home():
-    return jsonify({"status": "running"})
+    return jsonify({"status": "running", "repo": "yourbro_r3xtron"})
 
 
 @app.route("/api")
-def get_data():
+def api():
     uid = request.args.get("uid")
     region = request.args.get("region", "ind")
     nonce = request.args.get("nonce")
@@ -42,85 +42,14 @@ def get_data():
             URL,
             headers=HEADERS,
             cookies={"cookie": COOKIE},
-            data=data
+            data=data,
+            timeout=15
         )
-
         return jsonify(res.json())
 
     except Exception as e:
         return jsonify({"success": False, "error": str(e)})
 
 
-# ⭐ IMPORTANT: Vercel needs THIS
-def handler(environ, start_response):
-    return app(environ, start_response)            "error": "uid or nonce missing"
-        })
-
-    data = {
-        "action": "ff_get_player_info_paid",
-        "uid": uid,
-        "region": region,
-        "nonce": nonce
-    }
-
-    try:
-        res = requests.post(
-            URL,
-            headers=HEADERS,
-            cookies={"cookie": COOKIE},
-            data=data,
-            timeout=15
-        )
-
-        return jsonify(res.json())
-
-    except Exception as e:
-        return jsonify({
-            "success": False,
-            "error": str(e)
-        })
-
-
-# Vercel handler
-def handler(environ, start_response):
-    return app(environ, start_response)            data = {
-                "action": "ff_get_player_info_paid",
-                "uid": uid,
-                "region": region,
-                "nonce": nonce
-            }
-
-            res = requests.post(
-                URL,
-                headers=HEADERS,
-                cookies={"cookie": COOKIE},
-                data=data,
-                timeout=15
-            )
-
-            self.send_response(200)
-            self.send_header("Content-type", "application/json")
-            self.end_headers()
-            self.wfile.write(res.content)
-
-        except Exception as e:
-            self.send_response(200)
-            self.send_header("Content-type", "application/json")
-            self.end_headers()
-            self.wfile.write(str(e).encode())
-    try:
-        res = requests.post(
-            URL,
-            headers=HEADERS,
-            cookies={"cookie": COOKIE},
-            data=data,
-            timeout=15
-        )
-
-        return res.json()
-
-    except Exception as e:
-        return {"success": False, "error": str(e)}
-
-if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000)
+# ⭐ IMPORTANT: Vercel needs THIS (no api/ folder required)
+handler = app
